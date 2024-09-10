@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Detection Status</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f8f8;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        p {
+            color: #555;
+            margin-bottom: 10px;
+        }
+        .status {
+            font-weight: bold;
+            color: green;
+        }
+        .no-status {
+            font-style: italic;
+            color: #888;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Face Detection Status</h1>
+        <div id="status-container">
+            <p class="no-status">No detection status available.</p>
+        </div>
+    </div>
+    <script>
+        function fetchStatus() {
+            fetch('/status')
+                .then(response => response.json())
+                .then(data => {
+                    const statusContainer = document.getElementById('status-container');
+                    statusContainer.innerHTML = '';
+
+                    for (const [laptop_id, info] of Object.entries(data)) {
+                        const statusText = document.createElement('p');
+                        statusText.innerHTML = `${laptop_id}: <span class="status">${info.status}</span>`;
+                        statusContainer.appendChild(statusText);
+
+                        if (info.image_filename) {
+                            const img = document.createElement('img');
+                            img.src = `/images/${info.image_filename}`;
+                            img.alt = 'Detected Person';
+                            statusContainer.appendChild(img);
+                        }
+                    }
+
+                    if (Object.keys(data).length === 0) {
+                        statusContainer.innerHTML = '<p class="no-status">No detection status available.</p>';
+                    }
+                })
+                .catch(error => console.error('Error fetching status:', error));
+        }
+
+        setInterval(fetchStatus, 5000);  // Poll every 5 seconds
+        fetchStatus();  // Initial fetch
+    </script>
+</body>
+</html>
